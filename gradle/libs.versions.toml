@@ -13,6 +13,10 @@ qodana = "2025.1.1"
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
+#
+jackson-databind = "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+jackson-core = "com.fasterxml.jackson.core:jackson-core:2.15.2"
+jackson-annotations = "com.fasterxml.jackson.core:jackson-annotations:2.15.2"
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
