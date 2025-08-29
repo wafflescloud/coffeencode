@@ -84,6 +84,10 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
         }
     }
 
+    public static void recursivelyCheckDependencies(JsonNode parametersNode, Map<String, List<String>> dependenciesTable) {
+        
+    }
+
     public static Map<String, List<String>> summariseDependencies(String jsonContent) {
         // parse Json content
         ObjectMapper mapper = new ObjectMapper();
@@ -104,6 +108,13 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
             String className = classes.next();
             String formattedClassName = className.replace("/", ".");
             JsonNode dependencies = root.get(className);
+
+            // analyse parent
+            JsonNode parentNode = dependencies.get("parent");
+            if (parentNode != null && parentNode.isArray() && !parentNode.isEmpty()) { // there should be only one parent per class
+                String parent = parentNode.get(0).asText();
+                VisualisationToolWindowFactory.insertADependency(dependenciesTable, formattedClassName, parent);
+            }
 
             // analyse providers
             JsonNode providers = dependencies.get("providers");
