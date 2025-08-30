@@ -7,14 +7,18 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
-import javax.swing.JButton;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class VisualisationToolWindowFactory implements ToolWindowFactory {
     // read JSON file
@@ -43,7 +47,7 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
     /**
      * extract dependencies from the input format "method -> class"
      * @param string in the format "method -> class"
-     * @return empty list if method and class belongs to the same class,
+     * @return list with 1 item if method and class belongs to the same class,
      *      list with 2 items if method and class belongs to two different classes
      */
     public static List<String> extractDependencies(String string) {
@@ -66,6 +70,8 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
         if (!childClass.equals(parentClass)) {
             dependency.add(childClass); // first element
             dependency.add(parentClass); // second element
+        } else {
+            dependency.add(childClass);
         }
         return dependency;
     }
@@ -77,6 +83,9 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
      * @param parentClass: to be added to the arrayList of childClass's dependencies if it is not already there
      */
     public static void insertADependency(Map<String, List<String>> dependenciesTable, String childClass, String parentClass) {
+        if (childClass.isEmpty() || parentClass.isEmpty()) {
+            return;
+        }
         List<String> dependenciesOfChild = dependenciesTable.computeIfAbsent(childClass, key -> new ArrayList<>());
         // add the new dependency to the dependencies list of the childClass
         if (!dependenciesOfChild.contains(parentClass)) {
@@ -84,8 +93,37 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
         }
     }
 
-    public static void recursivelyCheckDependencies(JsonNode parametersNode, Map<String, List<String>> dependenciesTable) {
-        
+    /**
+     * for analysing dependencies in each injection method
+     * @param lowerLevelClass remember outer level child class
+     * @param node the JsonNode to evaluate
+     * @param dependenciesTable main dependencies table that records all the dependencies
+     */
+    public static void recursivelyCheckDependencies(String lowerLevelClass, JsonNode node, Map<String, List<String>> dependenciesTable) {
+        String childClass;
+
+        // methodId field always exist
+        String method = node.get("methodId").asText();
+        List<String> dependencies = VisualisationToolWindowFactory.extractDependencies(method);
+        if (dependencies.size() == 2) {
+            childClass = dependencies.get(0);
+            String parentClass = dependencies.get(1);
+            VisualisationToolWindowFactory.insertADependency(dependenciesTable, childClass, parentClass);
+        } else {
+            childClass = dependencies.get(0);
+        }
+        if (!lowerLevelClass.isEmpty()) {
+            // inner level child class is needed before outer level child class (lowerLevelClass) exists
+            VisualisationToolWindowFactory.insertADependency(dependenciesTable, lowerLevelClass, childClass);
+        }
+
+        // recursion terminates when there is no more inner parameters field
+        if (node.has("parameters")) {
+            JsonNode parameterNode = node.get("parameters");
+            for (JsonNode parameter : parameterNode) {
+                recursivelyCheckDependencies(childClass, parameter, dependenciesTable);
+            }
+        }
     }
 
     public static Map<String, List<String>> summariseDependencies(String jsonContent) {
@@ -123,22 +161,97 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
                     // analyse provider
                     String provider = providerNode.get("provider").asText();
                     List<String> dependency = VisualisationToolWindowFactory.extractDependencies(provider);
-                    if (!dependency.isEmpty()) {
-                        String childClass = dependency.get(0);
-                        String parentClass = dependency.get(1);
+                    String childClass;
+                    String parentClass;
+                    if (dependency.size() == 2) {
+                        childClass = dependency.get(0);
+                        parentClass = dependency.get(1);
                         VisualisationToolWindowFactory.insertADependency(dependenciesTable, childClass, parentClass);
+                    } else {
+                        childClass = dependency.get(0);
                     }
 
                     // analyse parameters if exists
+                    if (providerNode.has("parameters")) {
+                        JsonNode parameters = providerNode.get("parameters");
+                        // parameters of each provider if exists is always a string[] according to observation, not an Object[]
+                        for (JsonNode parameterNode : parameters) {
+                            String parameter = parameterNode.asText();
+                            VisualisationToolWindowFactory.insertADependency(dependenciesTable, childClass, parameter);
+                        }
+                    }
+                }
+            }
+
+            // analyse composite
+            JsonNode compositeNode = dependencies.get("composite");
+            if (compositeNode != null) {
+                Iterator<String> compositeNames = compositeNode.fieldNames();
+                while (compositeNames.hasNext()) {
+                    String compositeName = compositeNames.next();
+                    String composite = compositeNode.get(compositeName).asText();
+                    VisualisationToolWindowFactory.insertADependency(dependenciesTable, formattedClassName, composite);
+                }
+            }
+
+            // analyse injections
+            JsonNode injectionsNode = dependencies.get("injections");
+            if (injectionsNode != null) {
+                Iterator<String> injectionNames = injectionsNode.fieldNames();
+                while (injectionNames.hasNext()) {
+                    String injectionName = injectionNames.next();
+                    JsonNode injection = injectionsNode.get(injectionName);
+                    VisualisationToolWindowFactory.recursivelyCheckDependencies(formattedClassName, injection, dependenciesTable);
                 }
             }
         }
+        return dependenciesTable;
     }
 
 
     @Override
     public void createToolWindowContent (Project project, ToolWindow toolWindow){
+        // read knit.json file
+        String jsonContent = readFile(project);
+        String errMessage = "";
+        // if no json content is found
+        if (jsonContent.isEmpty()) {
+            errMessage = "Sorry, we could not find the knit.json file of your project.";
+        }
 
+        // summarise dependencies
+        Map<String, List<String>> dependenciesTable = summariseDependencies(jsonContent);
+        if (dependenciesTable.isEmpty()) {
+            errMessage = "Sorry, no dependencies were found for this project.";
+        }
+
+        // if contains error
+        if (!errMessage.isEmpty()) {
+            JBPanel panel = new JBPanel<>();
+            panel.add(new JBLabel(errMessage));
+            Content content = ContentFactory.getInstance().createContent(panel, null, false);
+            toolWindow.getContentManager().addContent(content);
+            return;
+        }
+
+        // set up the panel
+        JBPanel panel = new JBPanel<>();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        for (Map.Entry<String, List<String>> entry : dependenciesTable.entrySet()) {
+            String className = entry.getKey();
+            String dependencies = String.join(" & ", entry.getValue());
+            JTextArea text = new JTextArea(className + " needs " + dependencies);
+            text.setLineWrap(true); // in case the line is too long
+            text.setWrapStyleWord(true); // in case word does not cut half
+            text.setEditable(false); // prevent users from editing
+            panel.add(text);
+            panel.add(Box.createVerticalStrut(6)); // add 6 pixels of spacings after each class & its dependencies
+        }
+        JBScrollPane scrollPane = new JBScrollPane(panel); // in case vertically too long
+
+        // add to toolWindow
+        Content content = ContentFactory.getInstance().createContent(scrollPane, "Dependencies Visualisation", false);
+        toolWindow.getContentManager().addContent(content);
     }
 
 }

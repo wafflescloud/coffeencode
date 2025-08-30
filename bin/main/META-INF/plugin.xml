@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.coffeencode.dependenciesVisualisationPlugin</id>
-    <name>Dependencies Visualisation Plugin</name>
+    <name>Dependencies Visualisation</name>
     <vendor>coffeencode</vendor>
 
     <depends>com.intellij.modules.platform</depends>
@@ -9,7 +9,12 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.coffeencode.toolWindow.VisualisationToolWindowFactory" id="VisualisationToolWindowFactory"/>
-        <postStartupActivity implementation="com.github.coffeencode.startup.MyProjectActivity" />
+        <toolWindow factoryClass="com.github.coffeencode.toolWindow.VisualisationToolWindowFactory"
+                    id="DependenciesVisualisation"
+                    anchor="bottom"
+                    secondary="true"
+                    canCloseContents="false"
+                    icon="/icons/toolWindowIcon.svg"
+                    />
     </extensions>
 </idea-plugin>
