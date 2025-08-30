@@ -1,4 +1,7 @@
 # Dependencies Visualisation Plugin -- Team Coffee and Code
+![Build](https://github.com/wafflescloud/coffeencode/workflows/Build/badge.svg)
+[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 ## Project Inspiration
 Our project was inspired by the need to simplify dependency management in software development. While working with large projects, we noticed that dependencies often form complex **directed graphs**, which can lead to:
 - **Redundancy**: Unnecessary edges that are implied by transitive paths.
@@ -58,9 +61,6 @@ Like any real project, we faced multiple challenges:
 ---
 ## Conclusion
 This project not only gave us a tool to detect redundant and cyclic dependencies, but also taught us valuable lessons about graph algorithms, plugin development, and team collaboration. It was both a technical and collaborative learning journey!
-![Build](https://github.com/wafflescloud/coffeencode/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
 ---
 
