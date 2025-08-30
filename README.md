@@ -18,14 +18,17 @@ In large projects, this graph can become complex, leading to:
 - **Cyclic dependencies**: cycles can make builds unreliable.  
 - **Difficulty in understanding structure**: especially when dependencies grow across multiple levels.
 ---
-# Our Tool
+## How to Use
+- **Youtube tutorial**:
+---
+## Our Tool
 To address these issues, we implemented two Java utilities:
 - **`Cyclic` class**: Detects cyclic dependencies using DFS traversal.  
 - **`Transitive` class**:  
   - Finds all transitively reachable nodes from each node.  
   - Identifies redundant edges based on whether a node is reachable without a direct dependency.
 ---
-# Example
+## Example
 Given a graph:
 A → B → C
 ↓ ↑
@@ -34,7 +37,7 @@ The tool detects:
 - A cycle: A → B → C → A  
 - A redundant edge: A → C (since A can already reach C via B)
 ---
-# Sample Output
+## Sample Output
 Transitives: {A=[D, E], B=[E], C=[], D=[], E=[]}
 Redundant edges: {A=[C]}
 This means:
