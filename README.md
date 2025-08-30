@@ -7,7 +7,7 @@ Our project was inspired by the need to simplify dependency management in softwa
 - **Visualization difficulties**: Understanding the structure of large projects becomes increasingly challenging.
 This sparked the idea of building a **plugin tool** that not only **generates dependency graphs**, but also **automatically detects redundant and cyclic dependencies**.
 
-## What it does
+## What It Does
 We model software dependencies as a directed graph:
 G = (V, E)
 - **V**: Set of nodes (modules or classes)  
