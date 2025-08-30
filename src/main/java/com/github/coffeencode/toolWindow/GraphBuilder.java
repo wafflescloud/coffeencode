@@ -1,4 +1,4 @@
-package graph;
+package com.github.coffeencode.toolWindow;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
