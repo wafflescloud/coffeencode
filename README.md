@@ -1,4 +1,4 @@
-# Coffee and Code's Dependencies Visualisation Plugin
+# Dependencies Visualisation Plugin -- Team Coffee and Code
 
 ## Project Inspiration
 Our project was inspired by the need to simplify dependency management in software development. While working with large projects, we noticed that dependencies often form complex **directed graphs**, which can lead to:
