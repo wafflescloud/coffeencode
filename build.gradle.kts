@@ -15,11 +15,6 @@ plugins {
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
-dependencies {
-    implementation("org.jgrapht:jgrapht-core:1.5.2")
-    implementation("org.jgrapht:jgrapht-ext:1.5.2") // needed for JGraphXAdapter
-    implementation("com.github.vlsi.mxgraph:jgraphx:4.2.2")
-}
 
 // Set the JVM language level used to build the project.
 kotlin {
@@ -45,6 +40,11 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.jackson.core)
     implementation(libs.jackson.annotations)
+
+    // for JGraph
+    implementation("org.jgrapht:jgrapht-core:1.5.2")
+    implementation("org.jgrapht:jgrapht-ext:1.5.2") // needed for JGraphXAdapter
+    implementation("com.github.vlsi.mxgraph:jgraphx:4.2.2")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
