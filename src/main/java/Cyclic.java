@@ -24,11 +24,14 @@ public class Cyclic {
                 list = map.getOrDefault(cycle.get(j), new ArrayList<>());
 
                 if (j + 1 < cycle.size()) {
-                    list.add(cycle.get(j + 1));
-                    map.put(cycle.get(j), list);
+                    if (!list.contains(cycle.get(j + 1))) {
+                        list.add(cycle.get(j + 1));
+                        map.put(cycle.get(j), list);
+                    }
                 } else {
-                    list.add(cycle.get(0));
-                    map.put(cycle.get(j), list);
+                    if (!list.contains(cycle.get(0))) {
+                        map.put(cycle.get(j), list);
+                    }
                 }
             }
         }
