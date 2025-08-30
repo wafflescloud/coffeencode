@@ -48,6 +48,54 @@ public class Transitive {
         return result;
     }
 
+    /**
+     * find redundant nodes: direct edges is redundant if the node is reachable
+     * even without the direct dependencies.
+     * for example:
+     * A -> B -> C
+     * A -> C
+     * A -> C is redundant as A can still reach C via B
+     * @return a Map where each key is a node in a graph, and the corresponding
+     *         value is a list of nodes that is redundant from that node
+     * Example output:
+     * {A=[C]} this means that A->C is redundant
+     */
+    public Map<String, List<String>> findRedundant() {
+        Map<String, List<String>> redundantEdges = new HashMap<>();
+
+        for (String node : graph.keySet()) {
+            List<String> redundant = new ArrayList<>();
+
+            for (String neighbour : graph.getOrDefault(node, Collections.emptyList())) {
+                // Create a visited set to check if there's an alternative path
+                Set<String> visited = new HashSet<>();
+                if (canReachWithoutEdge(node, neighbour, visited, node, neighbour)) {
+                    redundant.add(neighbour);
+                }
+            }
+
+            if (!redundant.isEmpty()) {
+                redundantEdges.put(node, redundant);
+            }
+        }
+
+        return redundantEdges;
+    }
+
+    private boolean canReachWithoutEdge(String current, String target, Set<String> visited, String src, String excluded) {
+        if (current.equals(target)) return true;
+
+        for (String neighbour : graph.getOrDefault(current, Collections.emptyList())) {
+            if (current.equals(src) && neighbour.equals(excluded)) continue;
+            if (visited.add(neighbour)) {
+                if (canReachWithoutEdge(neighbour, target, visited, src, excluded)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void dfs(String node, Set<String> visited) {
         for (String neighbour : graph.getOrDefault(node, Collections.emptyList())) {
             if (visited.add(neighbour)) {
@@ -67,11 +115,12 @@ public class Transitive {
         graph1.put("E", Collections.emptyList());
 
         Transitive t1 = new Transitive(graph1);
-        System.out.println("Test 1 result: " + t1.findTransitives());
+        System.out.println("Transitives 1: " + t1.findTransitives());
+        System.out.println("Redundant edges 1: " + t1.findRedundant());
 
         //testing 2
         Map<String, List<String>> graph2 = new HashMap<>();
-        graph2.put("A", Arrays.asList("B", "C"));
+        graph2.put("A", Arrays.asList("B", "C", "F"));
         graph2.put("B", Arrays.asList("D", "E"));
         graph2.put("C", Arrays.asList("E"));
         graph2.put("D", Arrays.asList("F"));
@@ -79,7 +128,8 @@ public class Transitive {
         graph2.put("F", Collections.emptyList());
 
         Transitive t2 = new Transitive(graph2);
-        System.out.println("Test 2 result: " + t2.findTransitives());
+        System.out.println("Transitives 2: " + t2.findTransitives());
+        System.out.println("Redundant edges: " + t2.findRedundant());
     }
 }
 
