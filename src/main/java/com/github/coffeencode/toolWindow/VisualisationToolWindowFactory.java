@@ -10,7 +10,6 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -31,6 +30,12 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
         if (dependenciesTable.isEmpty()) {
             errMessage = "Sorry, no dependencies were found for this project.";
         }
+
+        // find cycles
+        Map<String, List<String>> cyclicDependencies = new Cyclic(dependenciesTable).findCycles();
+
+        // find transitives
+        Map<String, List<String>> transitiveDependencies = new Transitive(dependenciesTable).findTransitives();
 
         // if contains error
         if (!errMessage.isEmpty()) {
@@ -54,6 +59,35 @@ public class VisualisationToolWindowFactory implements ToolWindowFactory {
             panel.add(text);
             panel.add(Box.createVerticalStrut(6)); // add 6 pixels of spacings after each class & its dependencies
         }
+
+        // display cycles
+        panel.add(Box.createVerticalStrut(12)); // add 12 pixels to spacings to separate from all dependencies above
+        panel.add(new JTextArea("Those involved in cyclic dependencies: "));
+        for (Map.Entry<String, List<String>> entry : cyclicDependencies.entrySet()) {
+            String className = entry.getKey();
+            String dependencies = String.join(" & ", entry.getValue());
+            JTextArea text = new JTextArea(className + " needs " + dependencies);
+            text.setLineWrap(true); // in case the line is too long
+            text.setWrapStyleWord(true); // in case word does not cut half
+            text.setEditable(false); // prevent users from editing
+            panel.add(text);
+            panel.add(Box.createVerticalStrut(6)); // add 6 pixels of spacings after each class & its dependencies
+        }
+
+        // display transitive dependencies
+        panel.add(Box.createVerticalStrut(12)); // add 12 pixels to spacings to separate from all dependencies above
+        panel.add(new JTextArea("Transitive dependencies: "));
+        for (Map.Entry<String, List<String>> entry : transitiveDependencies.entrySet()) {
+            String className = entry.getKey();
+            String dependencies = String.join(" & ", entry.getValue());
+            JTextArea text = new JTextArea(className + " needs " + dependencies);
+            text.setLineWrap(true); // in case the line is too long
+            text.setWrapStyleWord(true); // in case word does not cut half
+            text.setEditable(false); // prevent users from editing
+            panel.add(text);
+            panel.add(Box.createVerticalStrut(6)); // add 6 pixels of spacings after each class & its dependencies
+        }
+
         JBScrollPane scrollPane = new JBScrollPane(panel); // in case vertically too long
 
         // add to toolWindow

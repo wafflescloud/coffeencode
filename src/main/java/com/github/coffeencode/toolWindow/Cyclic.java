@@ -1,3 +1,5 @@
+package com.github.coffeencode.toolWindow;
+
 import java.util.*;
 
 public class Cyclic {
@@ -56,5 +58,25 @@ public class Cyclic {
 
         path.pop();
         visited.remove(curr);
+    }
+
+    public static void main(String[] args) {
+        Map<String, List<String>> origin = new HashMap<>();
+        List<String> aList = new ArrayList<>();
+        aList.addAll(List.of("B", "D"));
+        List<String> bList = new ArrayList<>();
+        bList.addAll(List.of("C"));
+        List<String> cList = new ArrayList<>();
+        cList.addAll(List.of("A"));
+        List<String> dList = new ArrayList<>();
+        dList.addAll(List.of("A"));
+        origin.put("A", aList);
+        origin.put("B", bList);
+        origin.put("C", cList);
+        origin.put("D", dList);
+
+        Cyclic originalCyclic = new Cyclic(origin);
+        Map<String, List<String>> cycles = originalCyclic.findCycles();
+        System.out.println(cycles);
     }
 }

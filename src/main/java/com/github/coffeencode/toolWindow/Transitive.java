@@ -1,10 +1,12 @@
+package com.github.coffeencode.toolWindow;
+
 import java.util.*;
 
 public class Transitive {
     private final Map<String, List<String>> graph;
 
     /**
-     * Transitive constructor
+     * com.github.coffeencode.toolWindow.Transitive constructor
      * @param graph
      */
     public Transitive(Map<String, List<String>> graph) {
@@ -13,9 +15,9 @@ public class Transitive {
 
     /**
      * finds all transitively reachable nodes for each node in the graph
-     * usage: create a Transitive instance with graph of interest then
+     * usage: create a com.github.coffeencode.toolWindow.Transitive instance with graph of interest then
      *        call this method.
-     * Eg: Transitive t = new Transitive(graph);
+     * Eg: com.github.coffeencode.toolWindow.Transitive t = new com.github.coffeencode.toolWindow.Transitive(graph);
      *     t.findTransitives();
      * @return a Map where each key is a node in a graph, and the corresponding
      *          value is a list of nodes transitively reachable from that node
@@ -29,7 +31,7 @@ public class Transitive {
      * check out the main function used for testing for more example usage.
      * To test this java file:
      * -> cd src\main\java
-     * -> javac Transitive.java
+     * -> javac com.github.coffeencode.toolWindow.Transitive.java
      * -> java Transtive (this runs the file and output the test cases from main)
      */
     public Map<String, List<String>> findTransitives() {
@@ -53,6 +55,7 @@ public class Transitive {
             }
         }
     }
+
 
     public static void main(String[] args) {
         //testing 1
