@@ -8,6 +8,15 @@
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
+    <actions>
+        <action id="MyPluginAction"
+                class="com.github.coffeencode.toolWindow.MyPluginAction"
+                text="My Plugin Action"
+                description="Shows a message">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.coffeencode.toolWindow.VisualisationToolWindowFactory"
                     id="DependenciesVisualisation"
