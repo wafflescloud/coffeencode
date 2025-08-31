@@ -27,9 +27,11 @@ To address these issues, we implemented two Java utilities:
 ---
 ## Example
 Given a graph:
+
 A → B → C
 ↓ ↑
 └──→ C ──┘
+
 The tool detects:
 - A cycle: A → B → C → A  
 - A redundant edge: A → C (since A can already reach C via B)
